@@ -1,24 +1,13 @@
-/* Headerfiles */
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
 #include <errno.h>
 
-
-
-/* Definitions */
-
-
 // Default buffer size for line and filenames
 #define BUFSIZE 255 
 
-
-
 // General tokenization to make stuff simpler.
-// -------------------------------------------------------------------------------------------
 enum Token {
   TOK_EOF = 0,        // EOF or end of line
   TOK_IDENTIFIER = 1, // C identifiers
@@ -30,12 +19,12 @@ enum Token {
   TOK_COMM = 64,      // ','
   other = -1,         // '*'
 };
-// -------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------
 
-
-
-/* Functions */
+// pair of tokens in order.
+struct Tokens {
+  enum Token left;
+  enum Token right;
+};
 
 
 // Follow a char up to the end and ensure it's an identifier.
@@ -68,9 +57,6 @@ int getIdentifier(char** str, char identres[BUFSIZE], int* identlen) {
   identres[ (*identlen)++ ] = '\0';
   return 1; 
 }
-// -------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------
-
 
 
 // Get an individual expression from the "currentLine." 
@@ -106,5 +92,3 @@ enum Token getExpression(char** currentLine, char resexp[BUFSIZE], int* lenexp) 
   // end of file.
   return TOK_EOF;
 }
-// -------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------
