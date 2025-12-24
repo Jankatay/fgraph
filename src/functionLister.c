@@ -30,7 +30,7 @@ struct Tokens skip(FILE* srcfp, enum Token targets, char namebuf[BUFSIZE], int* 
     }
 
     // Upon reaching the target
-    if(right & targets) {
+    if((left | right) & targets) {
       // success, rewind buffer and return info.
       fseek(srcfp, -strnlen(lineptr, BUFSIZE), SEEK_CUR);
       return (struct Tokens){left, right};
@@ -75,9 +75,6 @@ int encloseParams(FILE* paramsFileptr) {
     // exit on error
     if(mainToken == TOK_ERR) return 0;
 
-    // assume parentheses
-    int parenChanged = 1; 
-
     // check prevToken on first iteration
     if(firstRun && prevToken == CL_PAREN) parens--;
     firstRun = 0;
@@ -85,14 +82,9 @@ int encloseParams(FILE* paramsFileptr) {
     // manage parentheses
     if(mainToken == OP_PAREN) parens++; 
     else if(mainToken == CL_PAREN) parens--; 
-    else parenChanged = 0;
 
-    // continue looping if assumption was correct or parentheses still open
-    if(parenChanged || parens) continue;
-
-    // check for success
-    if(prevToken != CL_PAREN) continue;
-    if(OP_CURL | TOK_SEMI & mainToken) return 1; 
+    // success
+    if(!parens) return 1;
   }
 
   // fail
@@ -122,6 +114,9 @@ int listFunctions(FILE* codeFile, char res[BUFSIZE]) {
     // Try again if not part of a function declaration
     if(!isFunctionDeclaration) continue;
     if(!encloseParams(codeFile)) continue;
+
+    // function declarations should end with '{' or ';'
+    
 
     // Print the function identifier.
     printf("%s\n", buf);

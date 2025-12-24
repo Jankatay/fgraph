@@ -60,6 +60,7 @@ int getIdentifier(char** str, char identres[BUFSIZE], int* identlen) {
 }
 
 
+// TODO: make this use a FILE* instead
 // Get an individual expression from the "currentLine." 
 // The expression can be an identifier or something like '('
 // In case of identifiers, writes the expression to resexp and sets lenexp to the length.
