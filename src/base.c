@@ -17,6 +17,7 @@ enum Token {
   OP_PAREN = 16,      // '('
   CL_PAREN = 32,      // ')'
   TOK_COMM = 64,      // ','
+  TOK_SEMI = 128,     // ';'
   other = -1,         // '*'
 };
 
@@ -74,11 +75,12 @@ enum Token getExpression(char** currentLine, char resexp[BUFSIZE], int* lenexp) 
     // Check trivial symbols
     char* backup = *currentLine;
     *currentLine = c+1;
-    if(*c == '{') { return OP_CURL; }
-    if(*c == '}') { return CL_CURL; }
-    if(*c == '(') { return OP_PAREN; }
-    if(*c == ')') { return CL_PAREN; }
-    if(*c == ',') { return TOK_COMM; }
+    if(*c == '{') return OP_CURL;
+    if(*c == '}') return CL_CURL;
+    if(*c == '(') return OP_PAREN;
+    if(*c == ')') return CL_PAREN;
+    if(*c == ',') return TOK_COMM;
+    if(*c == ';') return TOK_SEMI;
     *currentLine = backup;
 
     // Follow up with the identifiers.
@@ -87,6 +89,8 @@ enum Token getExpression(char** currentLine, char resexp[BUFSIZE], int* lenexp) 
       *currentLine = c;
       return success? TOK_IDENTIFIER : TOK_ERR;
     }
+
+    // skip everything else
   }
 
   // end of file.
