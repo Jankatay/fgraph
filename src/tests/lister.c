@@ -1,10 +1,174 @@
-int encloseParams(FILE* paramsFileptr) {
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <string.h>
+#include <errno.h>
+
+// Default buffer size for line and filenames
+#define BUFSIZE 255 
+
+// General tokenization to make stuff simpler.
+enum Token {
+  TOK_EOF = 0,        // EOF or end of line
+  TOK_IDENTIFIER = 1, // C identifiers
+  TOK_ERR = 2,        // error
+  OP_CURL = 4,        // '{'
+  CL_CURL = 8,        // '}'
+  OP_PAREN = 16,      // '('
+  CL_PAREN = 32,      // ')'
+  TOK_COMM = 64,      // ','
+  TOK_SEMI = 128,     // ';'
+  other = -1,         // '*'
+};
+
+
+// Follow a char up to the end and ensure it's an identifier.
+// Store identifier in identstr and length in identlen
+// returns 0 on error and 1 on success
+// -------------------------------------------------------------------------------------------
+int getIdentifier(char** str, char identres[BUFSIZE], int* identlen) {
+  // sanitize
+  if(!identlen || !str || !(*str)) return 0;
+  if(!isalpha(**str)) return 0;
+  
+  // init
+  *identlen = 0;
+  char* c = NULL; 
+
+  // until the delimiter
+  for(c = *str; c && *c != EOF; *c++) {
+    if(*identlen == (BUFSIZ-1)) return 0;
+    // check delimiter
+    if(isspace(*c)) break;
+    if(ispunct(*c)) break;
+    // check error
+    if(!isalnum) return 0;
+    // add to list otherwise.
+    identres[ (*identlen)++ ] = *c;
+  }
+ 
+  // success
+  *str = c;
+  identres[ (*identlen)++ ] = '\0';
+  return 1; 
 }
 
 
-int listFunctions(FILE* codeFile, char res[BUFSIZE]) {
+// Get an individual expression from the "currentLine." 
+// The expression can be an identifier or something like '('
+// In case of identifiers, writes the expression to resexp and sets lenexp to the length.
+// Skips everything else while parsing
+// Returns the token
+// -------------------------------------------------------------------------------------------
+enum Token getExpression(char** currentLine, char resexp[BUFSIZE], int* lenexp) {
+  if(!currentLine || !(*currentLine)) return TOK_ERR;
+
+  // For each character.
+  for(char* c = *currentLine; *c && *c != EOF; c++) {
+
+    // Check trivial symbols
+    char* backup = *currentLine;
+    *currentLine = c+1;
+    if(*c == '{') return OP_CURL;
+    if(*c == '}') return CL_CURL;
+    if(*c == '(') return OP_PAREN;
+    if(*c == ')') return CL_PAREN;
+    if(*c == ',') return TOK_COMM;
+    if(*c == ';') return TOK_SEMI;
+    *currentLine = backup;
+
+    // Follow up with the identifiers.
+    if(isalpha(*c)) {
+      int success = getIdentifier(&c, resexp, lenexp);
+      *currentLine = c;
+      return success? TOK_IDENTIFIER : TOK_ERR;
+    }
+
+    // skip everything else
+  }
+
+  // end of file.
+  return TOK_EOF;
+}
+
+// Get next token from a file.
+// If an identifier, string will be stored in namebuf and namelen. 
+// Will automatically skip whitespace including newlines.
+// -------------------------------------------------------------------------------------------
+enum Token token(FILE* srcfp, char namebuf[BUFSIZE], int* namelen) {
+  if(!srcfp || !namelen) return TOK_ERR;
+  // init
+  char linebuf[BUFSIZE] = "";
+  char* lineptr = fgets(linebuf, BUFSIZE, srcfp);
+  if(!linebuf) return TOK_EOF; 
+
+  // loop
+  char ebuf[BUFSIZE] = "";
+  int elen = 0;
+  while("there are tokens") {
+    enum Token nextToken = getExpression(&lineptr, namebuf, namelen);
+    if(!lineptr) return TOK_EOF; // 
+
+    // Take next line if reached end of line
+    if(nextToken == TOK_EOF) {
+      lineptr = fgets(linebuf, BUFSIZE, srcfp);
+      continue;
+    }
+
+    // success, rewind buffer and return info.
+    fseek(srcfp, -strnlen(lineptr, BUFSIZE), SEEK_CUR);
+    return nextToken;
+  }
+}
+#include "base.c"
+
+
+// skip a file to a bitwise-or of tokens, will return TOK_ERR of any errorful's bitwise-or encountered
+// will hold the last identifier encountered, returning token inclusive.
+// set errorful= -1 to give error on everything besides succesful
+// set errorful= 0 to just skip to succesful regardless
+// will return which of the tokens it has encountered
+// Note will return TOK_EOF once file ends regardless
+enum Token skip(FILE* search, enum Token succesful, enum Token errorful, char last[BUFSIZE], int* lastsize) {
+  // bad input
+  if(!search) return TOK_ERR;
+  if(!succesful && !errorful) return TOK_ERR;
+
+  // while getting tokens
+  enum Token head = TOK_ERR;
+  while((head = token(search, last, lastsize))) {
+    if(succesful & head) return head;
+    if(errorful & head) return head;
+  }
+
+  // file ended
+  return TOK_EOF;
 }
 
 
+
+// Check tests/lister.c is being listed correctly.
+// -------------------------------------------------------------------------------------------
 int main() {
+  // get the first function
+  FILE* fp = fopen("tests/lister.c", "r");
+  char buf[BUFSIZE] = "";
+  int buflen = 0;
+
+  // for each token
+  enum Token tok = TOK_ERR;
+  while((tok = skip(fp, OP_PAREN, TOK_EOF, buf, &buflen))) {
+    // check the token
+    if(tok == TOK_ERR) {
+      fprintf(stderr, "Token error\n");
+      break;
+    }
+
+    // print the token
+    printf("%s\n", buf);
+  }
+
+  // success
+  fclose(fp);
+  return 0;
 }

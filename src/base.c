@@ -21,12 +21,6 @@ enum Token {
   other = -1,         // '*'
 };
 
-// pair of tokens in order.
-struct Tokens {
-  enum Token left;
-  enum Token right;
-};
-
 
 // Follow a char up to the end and ensure it's an identifier.
 // Store identifier in identstr and length in identlen
@@ -60,7 +54,6 @@ int getIdentifier(char** str, char identres[BUFSIZE], int* identlen) {
 }
 
 
-// TODO: make this use a FILE* instead
 // Get an individual expression from the "currentLine." 
 // The expression can be an identifier or something like '('
 // In case of identifiers, writes the expression to resexp and sets lenexp to the length.
@@ -95,5 +88,59 @@ enum Token getExpression(char** currentLine, char resexp[BUFSIZE], int* lenexp) 
   }
 
   // end of file.
+  return TOK_EOF;
+}
+
+
+// Get next token from a file.
+// If an identifier, string will be stored in namebuf and namelen. 
+// Will automatically skip whitespace including newlines.
+// -------------------------------------------------------------------------------------------
+enum Token token(FILE* srcfp, char namebuf[BUFSIZE], int* namelen) {
+  if(!srcfp || !namelen) return TOK_ERR;
+  // init
+  char linebuf[BUFSIZE] = "";
+  char* lineptr = fgets(linebuf, BUFSIZE, srcfp);
+  if(!linebuf) return TOK_EOF; 
+
+  // loop
+  char ebuf[BUFSIZE] = "";
+  int elen = 0;
+  while("there are tokens") {
+    enum Token nextToken = getExpression(&lineptr, namebuf, namelen);
+    if(!lineptr) return TOK_EOF; // 
+
+    // Take next line if reached end of line
+    if(nextToken == TOK_EOF) {
+      lineptr = fgets(linebuf, BUFSIZE, srcfp);
+      continue;
+    }
+
+    // success, rewind buffer and return info.
+    fseek(srcfp, -strnlen(lineptr, BUFSIZE), SEEK_CUR);
+    return nextToken;
+  }
+}
+
+
+// skip a file to a bitwise-or of tokens, will return TOK_ERR of any errorful's bitwise-or encountered
+// will hold the last identifier encountered, returning token inclusive.
+// set errorful= -1 to give error on everything besides succesful
+// set errorful= 0 to just skip to succesful regardless
+// will return which of the tokens it has encountered
+// Note will return TOK_EOF once file ends regardless
+enum Token skip(FILE* search, enum Token succesful, enum Token errorful, char last[BUFSIZE], int* lastsize) {
+  // bad input
+  if(!search) return TOK_ERR;
+  if(!succesful && !errorful) return TOK_ERR;
+
+  // while getting tokens
+  enum Token head = TOK_ERR;
+  while((head = token(search, last, lastsize))) {
+    if(succesful & head) return head;
+    if(errorful & head) return head;
+  }
+
+  // file ended
   return TOK_EOF;
 }
