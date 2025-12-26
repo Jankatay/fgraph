@@ -12,6 +12,15 @@ int main() {
 
   // for each token
   enum Token tok = TOK_ERR;
+
+  // vector tests
+  struct Vec vec = vnew();
+  vset(&vec, 0, "hi", 3);
+  vset(&vec, 64, NULL, 0);
+  
+  for(int i = 0; i < vec.cap; i++) {
+    if(vec.arr[i]) printf("%d: %s\n", i, vec.arr[i]);
+  }
 /*
   while((tok = skip(fp, OP_PAREN, TOK_EOF, buf, &buflen))) {
     // check the token

@@ -1,9 +1,22 @@
+// Reallocate pointer p of oldsize to newsize, "size" bytes each.
+// Will initialize new additions to 0
+// -------------------------------------------------------------------------------------------
+void* recalloc(void* ptr, size_t oldsize, size_t newsize, size_t size) {
+  // ask for memory
+  void* res = realloc(ptr, newsize * size);
+  if(!res) return NULL;
+  
+  // init with zeros
+  memset(res + oldsize*size, 0, (newsize-oldsize) * oldsize); 
+  return res;
+}
+
+
 // simple resizeable array of strings.
 // -------------------------------------------------------------------------------------------
 struct Vec {
-  char**  str;        // array of strings
-  size_t* strlen;     // array of their length
-  int len;            // 0-indexed length of vector, -1 on empty
+  char**  arr;        // array of strings
+  size_t* len;        // array of their length
   size_t  cap;        // capacity of vector
 };
 
@@ -13,9 +26,8 @@ struct Vec {
 struct Vec vnew() {
   // init it to have a capacity of 64 at the beginning
   struct Vec newVector = {
-    .str = calloc(64, sizeof(char*)),
-    .strlen = calloc(64, sizeof(int)),
-    .len = -1,
+    .arr = calloc(64, sizeof(char*)),
+    .len = calloc(64, sizeof(size_t)),
     .cap = 64
   };
   // return
@@ -33,23 +45,23 @@ int vset(size_t elen; struct Vec* vec, size_t index, char elem[elen], size_t ele
   if(index > vec->cap && !elem) return 1;
 
   // resize 
-  if(index > vec->cap) {
+  if(index >= vec->cap) {
     // I want NO memory overhead. I don't care about performance
-    size_t oldcap = vec->cap;
-    vec->cap = index; 
-    vec->str = realloc(vec->str, vec->cap);
-    if(!vec->str) return 0; // memory error
-    // fill the new memory with zeros
-    memset(vec->str + oldcap, 0, (index-oldcap));
+    int oldcap = vec->cap;
+    vec->cap = index+1; 
+    vec->arr = recalloc(vec->arr, oldcap, vec->cap, sizeof(char*));
+    vec->len = recalloc(vec->len, oldcap, vec->cap, sizeof(size_t));
+    if(!vec->arr || !vec->len) return 0; // memory error
   }
 
   // setup the memory for new element
-  vec->str[index] = realloc(vec->str[index], elen);
-  if(!elem) return 1; // it is free...
-  if(!vec->str[index]) return 0; // memory error 
+  vec->arr[index] = recalloc(vec->arr[index], vec->cap, elen, sizeof(size_t));
+  vec->len[index] = elen;
+  if(!elem) vec->arr[index] = NULL; // it is free...
+  if(!vec->arr[index]) return 0; // memory error 
 
   // now copy over the element
-  strncpy(vec->str[index], elem, elen); 
+  strncpy(vec->arr[index], elem, elen); 
   return 1;
 }
 
@@ -61,7 +73,7 @@ int vset(size_t elen; struct Vec* vec, size_t index, char elem[elen], size_t ele
 char* vget(struct Vec* vec, size_t index) {
   // sanitize
   if(!vec) return NULL;
-  if(vec->len < index) return NULL;
+  if(vec->cap < index) return NULL;
   // return
-  return vec->str[index];
+  return vec->arr[index];
 }
