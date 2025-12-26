@@ -1,4 +1,5 @@
 #include "base.c"
+#include "vector.c"
 
 
 // Check tests/lister.c is being listed correctly.
@@ -11,6 +12,7 @@ int main() {
 
   // for each token
   enum Token tok = TOK_ERR;
+/*
   while((tok = skip(fp, OP_PAREN, TOK_EOF, buf, &buflen))) {
     // check the token
     if(tok == TOK_ERR) {
@@ -21,6 +23,7 @@ int main() {
     // print the token
     printf("%s\n", buf);
   }
+*/
 
   // success
   fclose(fp);
