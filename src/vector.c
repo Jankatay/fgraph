@@ -2,12 +2,19 @@
 // Will initialize new additions to 0
 // -------------------------------------------------------------------------------------------
 void* recalloc(void* ptr, size_t oldsize, size_t newsize, size_t size) {
+  if(!ptr) return NULL;
+  // realloc with 0 is not c99
+  if(!newsize || !size) {
+    free(ptr);
+    return NULL;
+  }
   // ask for memory
-  void* res = realloc(ptr, newsize * size);
+  void* res = realloc(ptr, newsize*size);
   if(!res) return NULL;
   
   // init with zeros
-  memset(res + oldsize*size, 0, (newsize-oldsize) * oldsize); 
+  size_t newbytes = (newsize <= oldsize) ? 0 : newsize-oldsize;
+  memset(res + oldsize, 0, newbytes); 
   return res;
 }
 
@@ -55,7 +62,7 @@ int vset(size_t elen; struct Vec* vec, size_t index, char elem[elen], size_t ele
   }
 
   // setup the memory for new element
-  vec->arr[index] = recalloc(vec->arr[index], vec->cap, elen, sizeof(size_t));
+  vec->arr[index] = recalloc(vec->arr[index], vec->len[index], elen, sizeof(char));
   vec->len[index] = elen;
   if(!elem) vec->arr[index] = NULL; // it is free...
   if(!vec->arr[index]) return 0; // memory error 
