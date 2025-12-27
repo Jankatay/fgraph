@@ -1,0 +1,83 @@
+==1052== Memcheck, a memory error detector
+==1052== Copyright (C) 2002-2024, and GNU GPL'd, by Julian Seward et al.
+==1052== Using Valgrind-3.25.1 and LibVEX; rerun with -h for copyright info
+==1052== Command: ./functionLister
+==1052== 
+==1052== Conditional jump or move depends on uninitialised value(s)
+==1052==    at 0x484FC20: realloc (vg_replace_malloc.c:1801)
+==1052==    by 0x400199F: recalloc (vector.c:11)
+==1052==    by 0x4001B8F: vset (vector.c:65)
+==1052==    by 0x4001E3E: main (functionLister.c:19)
+==1052== 
+==1052== Conditional jump or move depends on uninitialised value(s)
+==1052==    at 0x40019BA: recalloc (vector.c:15)
+==1052==    by 0x4001B8F: vset (vector.c:65)
+==1052==    by 0x4001E3E: main (functionLister.c:19)
+==1052== 
+==1052== Conditional jump or move depends on uninitialised value(s)
+==1052==    at 0x48560CE: memset (vg_replace_strmem.c:1391)
+==1052==    by 0x40019F2: recalloc (vector.c:17)
+==1052==    by 0x4001B8F: vset (vector.c:65)
+==1052==    by 0x4001E3E: main (functionLister.c:19)
+==1052== 
+==1052== Conditional jump or move depends on uninitialised value(s)
+==1052==    at 0x4856104: memset (vg_replace_strmem.c:1391)
+==1052==    by 0x40019F2: recalloc (vector.c:17)
+==1052==    by 0x4001B8F: vset (vector.c:65)
+==1052==    by 0x4001E3E: main (functionLister.c:19)
+==1052== 
+==1052== Conditional jump or move depends on uninitialised value(s)
+==1052==    at 0x4856164: memset (vg_replace_strmem.c:1391)
+==1052==    by 0x40019F2: recalloc (vector.c:17)
+==1052==    by 0x4001B8F: vset (vector.c:65)
+==1052==    by 0x4001E3E: main (functionLister.c:19)
+==1052== 
+==1052== Conditional jump or move depends on uninitialised value(s)
+==1052==    at 0x48561A9: memset (vg_replace_strmem.c:1391)
+==1052==    by 0x40019F2: recalloc (vector.c:17)
+==1052==    by 0x4001B8F: vset (vector.c:65)
+==1052==    by 0x4001E3E: main (functionLister.c:19)
+==1052== 
+==1052== Conditional jump or move depends on uninitialised value(s)
+==1052==    at 0x48561B8: memset (vg_replace_strmem.c:1391)
+==1052==    by 0x40019F2: recalloc (vector.c:17)
+==1052==    by 0x4001B8F: vset (vector.c:65)
+==1052==    by 0x4001E3E: main (functionLister.c:19)
+==1052== 
+==1052== Use of uninitialised value of size 8
+==1052==    at 0x48561BA: memset (vg_replace_strmem.c:1391)
+==1052==    by 0x40019F2: recalloc (vector.c:17)
+==1052==    by 0x4001B8F: vset (vector.c:65)
+==1052==    by 0x4001E3E: main (functionLister.c:19)
+==1052== 
+==1052== Conditional jump or move depends on uninitialised value(s)
+==1052==    at 0x48561C4: memset (vg_replace_strmem.c:1391)
+==1052==    by 0x40019F2: recalloc (vector.c:17)
+==1052==    by 0x4001B8F: vset (vector.c:65)
+==1052==    by 0x4001E3E: main (functionLister.c:19)
+==1052== 
+==1052== Conditional jump or move depends on uninitialised value(s)
+==1052==    at 0x48561DC: memset (vg_replace_strmem.c:1391)
+==1052==    by 0x40019F2: recalloc (vector.c:17)
+==1052==    by 0x4001B8F: vset (vector.c:65)
+==1052==    by 0x4001E3E: main (functionLister.c:19)
+==1052== 
+==1052== Conditional jump or move depends on uninitialised value(s)
+==1052==    at 0x4001E88: main (functionLister.c:23)
+==1052== 
+==1052== Conditional jump or move depends on uninitialised value(s)
+==1052==    at 0x484B741: free (vg_replace_malloc.c:989)
+==1052==    by 0x400197D: recalloc (vector.c:7)
+==1052==    by 0x4001B8F: vset (vector.c:65)
+==1052==    by 0x4001EE1: main (functionLister.c:24)
+==1052== 
+==1052== 
+==1052== HEAP SUMMARY:
+==1052==     in use at exit: 0 bytes in 0 blocks
+==1052==   total heap usage: 9 allocs, 9 frees, 7,362 bytes allocated
+==1052== 
+==1052== All heap blocks were freed -- no leaks are possible
+==1052== 
+==1052== Use --track-origins=yes to see where uninitialised values come from
+==1052== For lists of detected and suppressed errors, rerun with: -s
+==1052== ERROR SUMMARY: 101 errors from 12 contexts (suppressed: 0 from 0)

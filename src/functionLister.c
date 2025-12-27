@@ -18,6 +18,7 @@ int main() {
   vset(&vec, 0, "hi", 3);
   vset(&vec, 109, "lmao", 5);
   vset(&vec, 109, "h", 2);
+  vset(&vec, 109, "lmao", 5);
   
   for(int i = 0; i < vec.cap; i++) {
     if(vec.arr[i]) printf("%d: %s\n", i, vec.arr[i]);

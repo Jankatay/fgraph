@@ -2,19 +2,21 @@
 // Will initialize new additions to 0
 // -------------------------------------------------------------------------------------------
 void* recalloc(void* ptr, size_t oldsize, size_t newsize, size_t size) {
-  if(!ptr) return NULL;
   // realloc with 0 is not c99
   if(!newsize || !size) {
     free(ptr);
     return NULL;
   }
+
   // ask for memory
-  void* res = realloc(ptr, newsize*size);
+  // realloc and pointer arithmetic can be used for faster performance but it clutters valgrind.
+  void* res = calloc(newsize, size);
   if(!res) return NULL;
   
-  // init with zeros
-  size_t newbytes = (newsize <= oldsize) ? 0 : newsize-oldsize;
-  memset(res + oldsize, 0, newbytes); 
+  // copy over
+  size_t copyBytes = (newsize < oldsize) ? newsize : oldsize; 
+  res = memcpy(res, ptr, copyBytes);
+  free(ptr);
   return res;
 }
 
