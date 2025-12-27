@@ -123,22 +123,26 @@ enum Token token(FILE* srcfp, char namebuf[BUFSIZE], int* namelen) {
 }
 
 
-// skip a file to a bitwise-or of tokens, will return TOK_ERR of any errorful's bitwise-or encountered
-// will hold the last identifier encountered, returning token inclusive.
-// set errorful= -1 to give error on everything besides succesful
-// set errorful= 0 to just skip to succesful regardless
-// will return which of the tokens it has encountered
-// Note will return TOK_EOF once file ends regardless
-enum Token skip(FILE* search, enum Token succesful, enum Token errorful, char last[BUFSIZE], int* lastsize) {
+// Skip a file to a bitwise-or of tokens, will return which token made it stop.
+// Will hold the last identifier encountered, returning token inclusive.
+// Will return TOK_EOF if and only if file ends. 
+// TOK_ERR and TOK_EOF are hardcoded. You do not need to add them to stopsign.
+// -------------------------------------------------------------------------------------------
+enum Token skip(FILE* search, enum Token stopsign, char last[BUFSIZE], int* lastsize) {
+  stopsign |= TOK_ERR;
   // bad input
   if(!search) return TOK_ERR;
-  if(!succesful && !errorful) return TOK_ERR;
+
+  // just in case humans are stupid
+  if(!stopsign) {
+    fseek(search, 0, SEEK_END);
+    return TOK_EOF;
+  }
 
   // while getting tokens
   enum Token head = TOK_ERR;
   while((head = token(search, last, lastsize))) {
-    if(succesful & head) return head;
-    if(errorful & head) return head;
+    if(head & stopsign) return head;
   }
 
   // file ended

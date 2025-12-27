@@ -1,5 +1,7 @@
-// Reallocate pointer p of oldsize to newsize, "size" bytes each.
-// Will initialize new additions to 0
+// Reallocate pointer 'p' of 'oldsize' to 'newsize', "size" bytes each.
+// If you want something faster, use realloc and memset with pointer arithmetic.
+// Be warned that technique is warned by valgrind.
+// Initializes new memory to 0.
 // -------------------------------------------------------------------------------------------
 void* recalloc(void* ptr, size_t oldsize, size_t newsize, size_t size) {
   // realloc with 0 is not c99
@@ -9,7 +11,6 @@ void* recalloc(void* ptr, size_t oldsize, size_t newsize, size_t size) {
   }
 
   // ask for memory
-  // realloc and pointer arithmetic can be used for faster performance but it clutters valgrind.
   void* res = calloc(newsize, size);
   if(!res) return NULL;
   
@@ -41,6 +42,24 @@ struct Vec vnew() {
   };
   // return
   return newVector;
+}
+
+
+// Empty out a vector v.
+// -------------------------------------------------------------------------------------------
+void vempty(struct Vec v) {
+  for(int i = 0; i < v.cap; i++) {
+    if(v.arr[i]) free(v.arr[i]);
+  }
+}
+
+
+// Free the mepty vector v
+// Use `vempty(struct Vec)` beforehand if needed.
+// -------------------------------------------------------------------------------------------
+void vfree(struct Vec v) {
+  free(v.arr);
+  free(v.len);
 }
 
 
@@ -79,6 +98,7 @@ int vset(size_t elen; struct Vec* vec, size_t index, char elem[elen], size_t ele
 // it's a mutable reference, you can free it if you want. Just set *RET = NULL after
 // stores the length in lengthBuffer if not NULL
 // returns NULL on buffer overflow
+// -------------------------------------------------------------------------------------------
 char* vget(struct Vec* vec, size_t index) {
   // sanitize
   if(!vec) return NULL;
