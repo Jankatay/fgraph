@@ -148,3 +148,31 @@ enum Token skip(FILE* search, enum Token stopsign, char last[BUFSIZE], int* last
   // file ended
   return TOK_EOF;
 }
+
+
+// follow through enclosing using openings and closings
+// Example : opening='(', closing=')' with fseek='_' of "(_((a)b),())hello" would skip to "hello"
+// will put last identifier in trashbin and return length or -1 on error
+// it's named trashbin because 9 times out of 10 in practice you will want to ignore it anyways.
+// -------------------------------------------------------------------------------------------
+int enclose(FILE* afterParen, enum Token opening, enum Token closing, char trashbin[BUFSIZE]) {
+  // sanitize
+  if(!afterParen) return -1;
+
+  // the rest of the program is just getting ended down to 0
+  int ended = 1;
+
+  // for each token
+  int reslen = -1;
+  enum Token tok = 0;
+  while((tok = token(afterParen, trashbin, &reslen))) {
+    // move the goalpoast as necessary
+    if(tok & opening) ended++;
+    if(tok & closing) ended--;
+    // stop at the end
+    if(!ended) return reslen;
+  }
+  
+  // fail
+  return -1;
+}
