@@ -1,29 +1,40 @@
 #include "base.c"
 #include "vector.c"
 
-
-// TODO: Make this list everything at once using dynamic arrays
-// get the next function from a fileptr
-// returns -1 on error, 0 on none found(EOF), and length of function identifier otherwise.
+// skip to end of parentheses
 // -------------------------------------------------------------------------------------------
-int nextFunc(FILE* fileptr, char returnBuffer[BUFSIZE]) {
-  if(!fileptr) return -1;
+
+
+
+// get the next function from a fileptr
+// returns whatever it could gather so far on error
+// -------------------------------------------------------------------------------------------
+struct Vec listFunctions(FILE* fileptr, char returnBuffer[BUFSIZE]) {
+  struct Vec result = vnew(0);
+  if(!fileptr) return result;
+  size_t resultIndex = 0;
   int returnLength = 0;
   
   // get next token
   enum Token right, left = token(fileptr, returnBuffer, &returnLength);
-  if(!left) return 0;
+  if(!left) return result;
 
   // while getting new tokens
   while((right = token(fileptr, returnBuffer, &returnLength))) {
-    if(right == TOK_ERR) return -1;
-    // Skip non pattern-matching
-    if(left || TOK_IDENTIFIER || right != OP_PAREN) continue;
-    // success
-    return returnLength;
+    if(right == TOK_ERR) return result;
+    // handle pattern-matches
+    if(left == TOK_IDENTIFIER && right == OP_PAREN) {
+      // add to list
+      vset(&result, resultIndex++, returnBuffer, returnLength);
+      // TODO: skip the function params
+      //encloseParams(fileptr, returnBuffer, returnLength);
+      //encloseBody(fileptr, returnBuffer, returnLength);
+    }
+    // continue looping
+    left = right;
   }
   // eof
-  return 0;
+  return result;
 }
 
 
@@ -34,6 +45,11 @@ int main() {
   FILE* fp = fopen("tests/lister.c", "r");
   char buf[BUFSIZE] = "";
   int buflen = 0;
+
+  struct Vec v = nextFunc(fp, buf);
+  for(int i = 0; i < v.cap; i++) {
+    if(v.arr[i]) printf("%s\n", v.arr[i]);
+  }
 
   // success
   fclose(fp);

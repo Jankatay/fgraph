@@ -16,7 +16,7 @@ void* recalloc(void* ptr, size_t oldsize, size_t newsize, size_t size) {
   
   // copy over
   size_t copyBytes = (newsize < oldsize) ? newsize : oldsize; 
-  res = memcpy(res, ptr, copyBytes);
+  res = memcpy(res, ptr, copyBytes*size);
   free(ptr);
   return res;
 }
@@ -31,14 +31,14 @@ struct Vec {
 };
 
 
-// make a new vector with capacity of 64
+// make a new vector with capacity of initSize in beginning
 // -------------------------------------------------------------------------------------------
-struct Vec vnew() {
+struct Vec vnew(size_t initSize) {
   // init it to have a capacity of 64 at the beginning
   struct Vec newVector = {
-    .arr = calloc(64, sizeof(char*)),
-    .len = calloc(64, sizeof(size_t)),
-    .cap = 64
+    .arr = calloc(initSize, sizeof(char*)),
+    .len = calloc(initSize, sizeof(size_t)),
+    .cap = initSize
   };
   // return
   return newVector;
