@@ -1,3 +1,8 @@
+#ifndef BASE
+#define BASE
+
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -5,20 +10,23 @@
 #include <errno.h>
 
 // Default buffer size for line and filenames
-#define BUFSIZE 255 
+#define BUFSIZE 255
 
 // General tokenization to make stuff simpler.
 enum Token {
   TOK_EOF = 0,        // EOF or end of line
-  TOK_IDENTIFIER = 1, // C identifiers
+  TOK_IDENTIFIER = 1, // C identifiers plus '//', '/*', and '*/'
   TOK_ERR = 2,        // error
   OP_CURL = 4,        // '{'
   CL_CURL = 8,        // '}'
   OP_PAREN = 16,      // '('
   CL_PAREN = 32,      // ')'
-  TOK_COMM = 64,      // ','
+  TOK_COMMA = 64,     // ','
   TOK_SEMI = 128,     // ';'
-  other = -1,         // '*'
+  TOK_COMM = 256,     // "//"
+  OP_COMM = 512,      // "/*"
+  CL_COMM = 1024,     // "*/"
+  other = -1,         // * 
 };
 
 
@@ -26,7 +34,7 @@ enum Token {
 // Store identifier in identstr and length in identlen
 // returns 0 on error and 1 on success
 // -------------------------------------------------------------------------------------------
-int getIdentifier(char** str, char identres[BUFSIZE], int* identlen) {
+int identifier(char** str, char identres[BUFSIZE], int* identlen) {
   // sanitize
   if(!identlen || !str || !(*str)) return 0;
   if(!isalpha(**str)) return 0;
@@ -54,13 +62,12 @@ int getIdentifier(char** str, char identres[BUFSIZE], int* identlen) {
 }
 
 
-// Get an individual expression from the "currentLine." 
-// The expression can be an identifier or something like '('
+// Get an individual token from the "currentLine." 
 // In case of identifiers, writes the expression to resexp and sets lenexp to the length.
 // Skips everything else while parsing
 // Returns the token
 // -------------------------------------------------------------------------------------------
-enum Token getExpression(char** currentLine, char resexp[BUFSIZE], int* lenexp) {
+enum Token token(char** currentLine, char resexp[BUFSIZE], int* lenexp) {
   if(!currentLine || !(*currentLine)) return TOK_ERR;
 
   // For each character.
@@ -73,16 +80,23 @@ enum Token getExpression(char** currentLine, char resexp[BUFSIZE], int* lenexp) 
     if(*c == '}') return CL_CURL;
     if(*c == '(') return OP_PAREN;
     if(*c == ')') return CL_PAREN;
-    if(*c == ',') return TOK_COMM;
+    if(*c == ',') return TOK_COMMA;
     if(*c == ';') return TOK_SEMI;
     *currentLine = backup;
 
     // Follow up with the identifiers.
     if(isalpha(*c)) {
-      int success = getIdentifier(&c, resexp, lenexp);
+      int success = identifier(&c, resexp, lenexp);
       *currentLine = c;
       return success? TOK_IDENTIFIER : TOK_ERR;
     }
+
+    // comments
+    *currentLine += 2;
+    if((*c == '/') && (*(c+1) == '/')) return TOK_COMM;
+    if((*c == '/') && (*(c+1) == '*')) return OP_COMM;
+    if((*c == '*') && (*(c+1) == '/')) return CL_COMM;
+    *currentLine -= 2;
 
     // skip everything else
   }
@@ -96,7 +110,7 @@ enum Token getExpression(char** currentLine, char resexp[BUFSIZE], int* lenexp) 
 // If an identifier, string will be stored in namebuf and namelen. 
 // Will automatically skip whitespace including newlines.
 // -------------------------------------------------------------------------------------------
-enum Token token(FILE* srcfp, char namebuf[BUFSIZE], int* namelen) {
+enum Token ftoken(FILE* srcfp, char namebuf[BUFSIZE], int* namelen) {
   if(!srcfp || !namelen) return TOK_ERR;
   // init
   char linebuf[BUFSIZE] = "";
@@ -107,7 +121,7 @@ enum Token token(FILE* srcfp, char namebuf[BUFSIZE], int* namelen) {
   char ebuf[BUFSIZE] = "";
   int elen = 0;
   while("there are tokens") {
-    enum Token nextToken = getExpression(&lineptr, namebuf, namelen);
+    enum Token nextToken = token(&lineptr, namebuf, namelen);
     if(!lineptr) return TOK_EOF; // 
 
     // Take next line if reached end of line
@@ -141,7 +155,7 @@ enum Token skip(FILE* search, enum Token stopsign, char last[BUFSIZE], int* last
 
   // while getting tokens
   enum Token head = TOK_ERR;
-  while((head = token(search, last, lastsize))) {
+  while((head = ftoken(search, last, lastsize))) {
     if(head & stopsign) return head;
   }
 
@@ -165,7 +179,7 @@ int enclose(FILE* afterParen, enum Token opening, enum Token closing, char trash
   // for each token
   int reslen = -1;
   enum Token tok = 0;
-  while((tok = token(afterParen, trashbin, &reslen))) {
+  while((tok = ftoken(afterParen, trashbin, &reslen))) {
     // move the goalpoast as necessary
     if(tok & opening) ended++;
     if(tok & closing) ended--;
@@ -176,3 +190,7 @@ int enclose(FILE* afterParen, enum Token opening, enum Token closing, char trash
   // fail
   return -1;
 }
+
+
+
+#endif

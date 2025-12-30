@@ -1,3 +1,10 @@
+#ifndef VEC
+#define VEC
+
+#include <string.h>
+#include <stdlib.h>
+
+
 // Reallocate pointer 'p' of 'oldsize' to 'newsize', "size" bytes each.
 // If you want something faster, use realloc and memset with pointer arithmetic.
 // Be warned that technique is warned by valgrind.
@@ -31,23 +38,10 @@ struct Vec {
 };
 
 
-// make a new vector with capacity of initSize in beginning
-// -------------------------------------------------------------------------------------------
-struct Vec vnew(size_t initSize) {
-  // init it to have a capacity of 64 at the beginning
-  struct Vec newVector = {
-    .arr = calloc(initSize, sizeof(char*)),
-    .len = calloc(initSize, sizeof(size_t)),
-    .cap = initSize
-  };
-  // return
-  return newVector;
-}
-
-
 // Empty out a vector v.
 // -------------------------------------------------------------------------------------------
 void vempty(struct Vec v) {
+  if(!v.arr) return; // already empty
   for(int i = 0; i < v.cap; i++) {
     if(v.arr[i]) free(v.arr[i]);
   }
@@ -58,12 +52,12 @@ void vempty(struct Vec v) {
 // Use `vempty(struct Vec)` beforehand if needed.
 // -------------------------------------------------------------------------------------------
 void vfree(struct Vec v) {
-  free(v.arr);
-  free(v.len);
+  if(v.arr) free(v.arr);
+  if(v.len) free(v.len);
 }
 
 
-// put a new string "elem(ent)" of len "e(lem(ent))len" 
+// put a new string "elem(ent)" of len "e(lem(ent))len(gth)" I am just kidding "elem" is the string and "elen" is its length.
 // automatically resizes, returns 0 on memory error.
 // using elem=NULL AND elen=0 frees index.
 // -------------------------------------------------------------------------------------------
@@ -94,15 +88,31 @@ int vset(size_t elen; struct Vec* vec, size_t index, char elem[elen], size_t ele
 }
 
 
-// get element from vector
-// it's a mutable reference, you can free it if you want. Just set *RET = NULL after
-// stores the length in lengthBuffer if not NULL
-// returns NULL on buffer overflow
+// linear-search a vector
+// set returnAddress=NULL to just confirm
+// returns index when found, -1 when not found, and -2 on error
 // -------------------------------------------------------------------------------------------
-char* vget(struct Vec* vec, size_t index) {
+int vfind(struct Vec hay, char needle[BUFSIZE]) {
   // sanitize
-  if(!vec) return NULL;
-  if(vec->cap < index) return NULL;
-  // return
-  return vec->arr[index];
+  if(!hay.arr || !hay.len) return -2;
+  if(!hay.cap) return -1; 
+
+  for(int i = 0; i < hay.cap; i++) {
+    // init
+    char* str = hay.arr[i];
+    int len = hay.len[i];
+
+    // skip to match-string
+    if(!str) continue; 
+    if(strncmp(str, needle, len)) continue;
+
+    // success
+    return i;
+  }
+  
+  // failure
+  return -1;
 }
+
+
+#endif
