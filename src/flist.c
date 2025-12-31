@@ -20,12 +20,15 @@ struct Vec flist(FILE* fileptr) {
   int binlen = 0;
   
   // get next token
-  enum Token right, left = ftoken(fileptr, binbuf, &binlen);
-  if(!left) return result;
+  enum Token right, left = TOK_ERR;
 
   // while getting new tokens
   while((right = ftoken(fileptr, binbuf, &binlen))) {
     if(right == TOK_ERR) return result;
+    if(right == TOK_SKIP) {
+      left = skip(fileptr, TOK_EOL, binbuf, &binlen);
+      continue;
+    }
 
     // handle pattern-matches
     if(left == TOK_IDENTIFIER && right == OP_PAREN) {

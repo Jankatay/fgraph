@@ -23,6 +23,8 @@ enum Token {
   CL_PAREN = 32,      // ')'
   TOK_COMMA = 64,     // ','
   TOK_SEMI = 128,     // ';'
+  TOK_EOL = 256,      // '\n'
+  TOK_SKIP = 512,     // line-skippers, '//' and '#'
   other = -1,         // * 
 };
 
@@ -71,7 +73,6 @@ enum Token token(char** currentLine, char resexp[BUFSIZE], int* lenexp) {
   for(char* c = *currentLine; *c && *c != EOF; c++) {
 
     // Check trivial symbols
-    char* backup = *currentLine;
     *currentLine = c+1;
     if(*c == '{') return OP_CURL;
     if(*c == '}') return CL_CURL;
@@ -79,7 +80,14 @@ enum Token token(char** currentLine, char resexp[BUFSIZE], int* lenexp) {
     if(*c == ')') return CL_PAREN;
     if(*c == ',') return TOK_COMMA;
     if(*c == ';') return TOK_SEMI;
-    *currentLine = backup;
+    if(*c == '#') return TOK_SKIP;
+    if(*c == '\n') return TOK_EOL;
+    *currentLine = c-1;
+
+    // non-trivial symbols
+    *currentLine = c+2;
+    if(*c == '/' && *(c+1) == '/') return TOK_SKIP;
+    *currentLine = c+2;
 
     // Follow up with the identifiers.
     if(isalpha(*c)) {
