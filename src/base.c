@@ -23,9 +23,6 @@ enum Token {
   CL_PAREN = 32,      // ')'
   TOK_COMMA = 64,     // ','
   TOK_SEMI = 128,     // ';'
-  TOK_COMM = 256,     // "//"
-  OP_COMM = 512,      // "/*"
-  CL_COMM = 1024,     // "*/"
   other = -1,         // * 
 };
 
@@ -90,13 +87,6 @@ enum Token token(char** currentLine, char resexp[BUFSIZE], int* lenexp) {
       *currentLine = c;
       return success? TOK_IDENTIFIER : TOK_ERR;
     }
-
-    // comments
-    *currentLine += 2;
-    if((*c == '/') && (*(c+1) == '/')) return TOK_COMM;
-    if((*c == '/') && (*(c+1) == '*')) return OP_COMM;
-    if((*c == '*') && (*(c+1) == '/')) return CL_COMM;
-    *currentLine -= 2;
 
     // skip everything else
   }
