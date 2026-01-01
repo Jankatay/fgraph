@@ -24,15 +24,9 @@ struct Vec flist(FILE* fileptr) {
 
   // while getting new tokens
   while((right = ftoken(fileptr, binbuf, &binlen))) {
+    // special cases
     if(right == TOK_ERR) return result;
-    if(right == TOK_SKIP) {
-      left = skip(fileptr, TOK_EOL, binbuf, &binlen);
-      continue;
-    }
-    if(right == OP_COMM) {
-      left = skip(fileptr, CL_COMM, binbuf, &binlen);
-      continue;
-    }
+    if(tokskip(fileptr, right)) continue;
 
     // handle pattern-matches
     if(left == TOK_IDENTIFIER && right == OP_PAREN) {

@@ -166,6 +166,33 @@ enum Token skip(FILE* search, enum Token stopsign, char last[BUFSIZE], int* last
 }
 
 
+// handle skipping/comments in a file based on last token
+// returns 1 if skipped anything, and 0 otherwise
+// ----------------------------------------------------------------
+int tokskip(FILE* filepos, enum Token last) {
+  if(!filepos) return 0;
+
+  // init
+  char ignore[BUFSIZE];
+  int ignorelen = 0;
+  
+  // handle '//' and '#'
+  if(last == TOK_SKIP) {                                      
+    skip(filepos, TOK_EOL, ignore, &ignorelen);     
+    return 1;
+  }                                                             
+
+  // handle '/*'
+  if(last == OP_COMM) {                                        
+    skip(filepos, CL_COMM, ignore, &ignorelen);             
+    return 1;
+  }                                                             
+
+  // didn't skip anything
+  return 0;
+}
+
+
 // follow through enclosing using openings and closings
 // Example : opening='(', closing=')' with fseek='_' of "(_((a)b),())hello" would skip to "hello"
 // will put last identifier in trashbin and return length or -1 on error
@@ -182,6 +209,8 @@ int enclose(FILE* afterParen, enum Token opening, enum Token closing, char trash
   int reslen = -1;
   enum Token tok = 0;
   while((tok = ftoken(afterParen, trashbin, &reslen))) {
+    // skip comments
+    if(tokskip(afterParen, tok)) continue;
     // move the goalpoast as necessary
     if(tok & opening) ended++;
     if(tok & closing) ended--;
@@ -192,7 +221,6 @@ int enclose(FILE* afterParen, enum Token opening, enum Token closing, char trash
   // fail
   return -1;
 }
-
 
 
 #endif
