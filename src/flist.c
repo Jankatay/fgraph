@@ -29,6 +29,10 @@ struct Vec flist(FILE* fileptr) {
       left = skip(fileptr, TOK_EOL, binbuf, &binlen);
       continue;
     }
+    if(right == OP_COMM) {
+      left = skip(fileptr, CL_COMM, binbuf, &binlen);
+      continue;
+    }
 
     // handle pattern-matches
     if(left == TOK_IDENTIFIER && right == OP_PAREN) {

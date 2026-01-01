@@ -1,3 +1,5 @@
+
+/* invalid(); /* */ 
 // invalid();
 int encloseParams(FILE* paramsFileptr) {
   invalid(FILE* paramsFileptr);

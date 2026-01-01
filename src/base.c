@@ -25,6 +25,8 @@ enum Token {
   TOK_SEMI = 128,     // ';'
   TOK_EOL = 256,      // '\n'
   TOK_SKIP = 512,     // line-skippers, '//' and '#'
+  OP_COMM = 1024,     // '/*'
+  CL_COMM = 2048,     // '*/'
   other = -1,         // * 
 };
 
@@ -87,6 +89,8 @@ enum Token token(char** currentLine, char resexp[BUFSIZE], int* lenexp) {
     // non-trivial symbols
     *currentLine = c+2;
     if(*c == '/' && *(c+1) == '/') return TOK_SKIP;
+    if(*c == '/' && *(c+1) == '*') return OP_COMM;
+    if(*c == '*' && *(c+1) == '/') return CL_COMM;
     *currentLine = c+2;
 
     // Follow up with the identifiers.
