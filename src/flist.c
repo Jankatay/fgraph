@@ -4,48 +4,63 @@
 #include "base.c"
 #include "vec.c"
 
-// TODO: Split out a portion called "ffunc" that advances fileptr to beginning of the closest function.
-// get the next function from a fileptr
-// returns whatever it could gather so far on error
-// -------------------------------------------------------------------------------------------
-struct Vec flist(FILE* fileptr) {
-  // init
-  struct Vec result = {};
-  if(!fileptr) return result;
-  size_t vindex = 0;
-  int returnLength = 0;
 
-  // a trashbin to be ignored 90% of the time
-  char binbuf[BUFSIZE];
-  int binlen = 0;
-  
-  // get next token
-  enum Token right, left = TOK_ERR;
+// advances a filepos to next function, stopping at beginning of the args.
+// puts function name in name and length of len
+// returns -1 on error, 0 if none found until EOF, and 1 otherwise.
+// -------------------------------------------------------------------------------------------
+int ffunc(FILE* filepos, char buf[BUFSIZE], int* len) {
+  // init
+  if(!filepos) return -1;
 
   // while getting new tokens
-  while((right = ftoken(fileptr, binbuf, &binlen))) {
+  enum Token right, left = TOK_ERR;
+  while((right = ftoken(filepos, buf, len))) {
     // special cases
-    if(right == TOK_ERR) return result;
-    if(tokskip(fileptr, right)) continue;
+    if(right == TOK_ERR) return -1;
+    if(tokskip(filepos, right)) continue;
 
     // handle pattern-matches
-    if(left == TOK_IDENTIFIER && right == OP_PAREN) {
-      // add to list
-      vset(&result, vindex++, binbuf, binlen);
-
-      // skip the function params
-      enclose(fileptr, OP_PAREN, CL_PAREN, binbuf);
-
-       // skip the potential function body
-      enum Token bintok = ftoken(fileptr, binbuf, &binlen);
-      if(bintok == OP_CURL) enclose(fileptr, OP_CURL, CL_CURL, binbuf);
-      else if(bintok != TOK_SEMI) return result;
-    }
+    if(left == TOK_IDENTIFIER && right == OP_PAREN) return 1;
 
     // continue looping
     left = right;
   }
+
   // eof
+  return 0;
+}
+
+
+// get the next function from a fileptr
+// returns whatever it could gather so far on error
+// -------------------------------------------------------------------------------------------
+struct Vec flist(FILE* fileptr) {
+  // init and sanitize
+  struct Vec result = {};
+  size_t vindex = 0;
+  if(!fileptr) return result;
+
+  // to be ignored 90% of the time
+  char binbuf[BUFSIZE];
+  int binlen = 0;
+  
+  // while going to each function
+  int status = 0;
+  while((status = ffunc(fileptr, binbuf, &binlen)) > 0) {
+    // add to list
+    vset(&result, vindex++, binbuf, binlen);
+
+    // skip the function params
+    enclose(fileptr, OP_PAREN, CL_PAREN, binbuf);
+
+     // skip the potential function body
+    enum Token bintok = ftoken(fileptr, binbuf, &binlen);
+    if(bintok == OP_CURL) enclose(fileptr, OP_CURL, CL_CURL, binbuf);
+    else if(bintok != TOK_SEMI) return result;
+  }
+
+  // eof or error
   return result;
 }
 
@@ -76,5 +91,6 @@ int fadd(struct Vec* list, char filename[BUFSIZE]) {
   fclose(fd);
   return 1;
 }
+
 
 #endif

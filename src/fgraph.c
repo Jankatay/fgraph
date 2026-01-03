@@ -55,6 +55,13 @@ struct Vec fcalls(FILE* body, struct Vec usermade, int* status) {
 }
 
 
+// TODO:
+// go through a file "source" and write all functions and their requirements in a graphviz format to file "dest"
+// requires a list of all user-made function names
+// returns 0 on invalid file
+// -------------------------------------------------------------------------------------------
+
+
 // executable form
 // -------------------------------------------------------------------------------------------
 int main(int argc, char* argv[]) {
@@ -71,6 +78,7 @@ int main(int argc, char* argv[]) {
   for(int i = 0; i < vbuf.cap; i++) {
     if(vbuf.arr[i]) printf("%s\n", vbuf.arr[i]);
   }
+
 
   vempty(vbuf);
   vfree(vbuf);
