@@ -4,7 +4,7 @@
 #include "base.c"
 #include "vec.c"
 
-
+// TODO: Split out a portion called "ffunc" that advances fileptr to beginning of the closest function.
 // get the next function from a fileptr
 // returns whatever it could gather so far on error
 // -------------------------------------------------------------------------------------------
