@@ -2,15 +2,17 @@
 #define BASE
 
 
-
+// includes
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
 #include <errno.h>
 
+
 // Default buffer size for line and filenames
 #define BUFSIZE 255
+char IGNORE[BUFSIZE] = {};
 
 // General tokenization to make stuff simpler.
 enum Token {

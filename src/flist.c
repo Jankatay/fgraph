@@ -32,7 +32,7 @@ int ffunc(FILE* filepos, char buf[BUFSIZE], int* len) {
 }
 
 
-// get the next function from a fileptr
+// list all functions inside a fileptr
 // returns whatever it could gather so far on error
 // -------------------------------------------------------------------------------------------
 struct Vec flist(FILE* fileptr) {

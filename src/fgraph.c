@@ -1,65 +1,63 @@
 #include "flist.c"
 
 
-// map a function to functions it uses
-struct Map {
-  char* fname;       // function's name
-  int flen;          // length of fname
-  struct Vec fdep;   // array of dependencies
+// Graph to map a function to its dependencies.
+// -------------------------------------------------------------------------------------------
+struct Graph {
+  struct Vec names;   // each function name in order
+  struct Vec* map;    // mapping of names to dependencies
+  int len;            // amt of vertices
 };
 
 
 // starting from inside a function body, list all the function calls in list of "usermade" ones.
 // sets status to 0 on error and 1 on success, nullable.
 // -------------------------------------------------------------------------------------------
-struct Vec fcalls(FILE* body, struct Vec usermade, int* status) {
-  // init 
-  struct Vec dependencies = {};
-  int statusDump = 0;
-  if(!status) status = &statusDump;
-  int curlCount = 1;
-
+struct Graph fcalls(FILE* body, struct Vec usermade, int* status) {
   // sanitize
-  if(!body) return dependencies;
-  if(!usermade.cap) {
-    *status = 1;
-    return dependencies;
-  }
+  struct Graph res = {};
+  if(!body) return res;
+  if(!usermade.cap) return res;
 
-  // identifier info
-  char fname[BUFSIZE];
-  int flen = 0;
-  *status = 1;
+  // init status
+  int sdump = 0;
+  if(!status) status = &sdump;
+  if(*status) *status = 0;
 
-  // for each token
-  enum Token left, right = TOK_ERR;
-  while(curlCount) {
-    right = ftoken(body, fname, &flen);
-    // error doesn't mean the end, continue parsing regardless.
-    if(right & (TOK_ERR | TOK_EOF)) *status = 0; 
+  // init graph
+  int gindex = 0;
+  res = (struct Graph){
+    .names = {},
+    .map = calloc(usermade.cap, sizeof(struct Vec)),
+    .len = usermade.cap
+  };
 
-    // skip comments
-    if(tokskip(body, right)) continue;
-
-    // account for curly brackets
-    if(right == OP_CURL) curlCount++;
-    if(right == CL_CURL) curlCount--;
-
-    // check for function calls
-    if((left == TOK_IDENTIFIER) && (right == OP_PAREN)) vset(&dependencies, dependencies.cap, fname, flen);
-    right = left;
-  }
+  // to store function identifiers
+  char fid[BUFSIZE];
+  int fidlen = 0;
   
-  // body is closed
-  return dependencies;
+  // while going to each function
+  while(ffunc(body, fid, &fidlen) > 0) {
+    // duplicate the id into graph.names[] 
+    res.names.arr[gindex++] = strndup(fid, fidlen);
+
+    // skip the function params
+    enclose(body, OP_PAREN, CL_PAREN, IGNORE);
+
+     // skip if there is a semicolon
+    enum Token next = ftoken(body, fid, &fidlen);
+    if(next == TOK_SEMI) continue;
+
+    // return what could be gathered so far on error.
+    if(next != OP_CURL) return res; 
+    
+    // TODO: handle function bodies
+    // enclose(fileptr, OP_CURL, CL_CURL, IGNORE);
+  }
+
+  // eof or error
+  return res;
 }
-
-
-// TODO:
-// go through a file "source" and write all functions and their requirements in a graphviz format to file "dest"
-// requires a list of all user-made function names
-// returns 0 on invalid file
-// -------------------------------------------------------------------------------------------
 
 
 // executable form
