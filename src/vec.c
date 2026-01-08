@@ -1,6 +1,10 @@
 #ifndef VEC
 #define VEC
 
+#ifndef BUFSIZE
+#define BUFSIZE 255
+#endif
+
 #include <string.h>
 #include <stdlib.h>
 

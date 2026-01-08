@@ -1,4 +1,5 @@
 #include "flist.c"
+#include "file.c"
 
 
 // Graph to map a function to its dependencies.
@@ -12,6 +13,7 @@ struct Graph {
 
 // follow a function from right after start of the curly brackets until the end
 // returns a vector of all identifiers that were in the vector "usermade"
+// -------------------------------------------------------------------------------------------
 struct Vec fdepends(FILE* fbody, struct Vec usermade) {
   // init and sanitize
   struct Vec res = {};
@@ -103,6 +105,7 @@ struct Graph fcalls(FILE* body, struct Vec usermade, int* status) {
 // executable form
 // -------------------------------------------------------------------------------------------
 int main(int argc, char* argv[]) {
+/*
   // add each file to a list
   struct Vec vbuf = {};
   for(int i = 1; i < argc; i++) {
@@ -129,5 +132,7 @@ int main(int argc, char* argv[]) {
 
   vempty(vbuf);
   vfree(vbuf);
+*/
+  resolvePaths("./fgraph", NULL, NULL, 0);
   return 0;
 }
