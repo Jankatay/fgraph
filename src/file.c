@@ -1,37 +1,28 @@
 #include <stdio.h>
 #include <sys/stat.h>
+#include <fcntl.h>
+#include <ftw.h>
 #include <string.h>
 #include "vec.c"
 
 
-// Resolve files under a path.
-// Ensure "codefile" is a readable file and append it to the list "dest"
-// If it's a directory, will go through all files recursively and append them instead
-// If it's a directory and ext isn't NULL, adds only files that have the correct extensions. 
-// chext tells it if you want to check for extensions or not, will automatically turn on when dir.
-// Extensions is a string ideally seperated by spaces, like ".c .cpp .h.hpp" -> "*.c", "*.cpp", ".h", ".hpp"
-// Returns 0 if not a readable file or directory or memory error.
+// important global variables 
 // -------------------------------------------------------------------------------------------
-int resolvePaths(char path[BUFSIZE], struct Vec* dest, char ext[], int chext) {
-  if(!path) return 0;
+struct Vec finfo = {};           // Will be appended result of "files" function
+char* fext = NULL;               // Optional extensions for the "files" function
 
-  // get file info
-  struct stat sb = {};
-  if(stat(path, &sb) < 0) return 0;
 
-  // Base case, a file. Append and return
-  if(sb.st_mode & S_IFMT & S_IFREG) {
-    char* extension = strrchr(path, '.');
-    // run an extension check
-    if(chext && !strstr(ext, extension)) return 0; 
-    // append on success
-    return vset(dest, dest->cap, path, strnlen(path, BUFSIZE));
+// function for the ntfw(3), appends source code files under a directory
+// appends all files found to global variable "finfo"
+// can setup an optionally space-seperated list of extensions 
+// for example fext = ".c .cpp .h" will only append files that have those extensions
+// -------------------------------------------------------------------------------------------
+static int files(const char* topdir, const struct stat* sb, int tflag, struct FTW* ftwbuf) {
+  printf("%s\n", topdir);
+  // append
+  if(tflag == FTW_F) {
+    vset(&finfo, finfo.cap, topdir, strnlen(topdir, BUFSIZE));
   }
-
-  // it MUST be a directory if not file, alternatively error.
-  int isdir = sb.st_mode & S_IFMT & S_IFDIR;
-  if(!isdir) return 0;
-
-  // TODO: Get all the files under a directory and recurse
-  return 1;
+  // continue
+  return 0; 
 }

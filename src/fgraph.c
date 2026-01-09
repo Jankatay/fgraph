@@ -1,5 +1,6 @@
 #include "flist.c"
 #include "file.c"
+#include <ftw.h>
 
 
 // Graph to map a function to its dependencies.
@@ -133,6 +134,10 @@ int main(int argc, char* argv[]) {
   vempty(vbuf);
   vfree(vbuf);
 */
-  resolvePaths("./fgraph", NULL, NULL, 0);
+  // get files, return if no files found
+  nftw(".", files, 20, FTW_DEPTH | FTW_PHYS);
+  
+
+  // for each file
   return 0;
 }

@@ -65,7 +65,7 @@ void vfree(struct Vec v) {
 // automatically resizes, returns 0 on memory error.
 // using elem=NULL AND elen=0 frees index.
 // -------------------------------------------------------------------------------------------
-int vset(size_t elen; struct Vec* vec, size_t index, char elem[elen], size_t elen) {
+int vset(struct Vec* vec, size_t index, const char* elem, size_t elen) {
   // sanitize
   if(!vec) return 1;
   if(index > vec->cap && !elem) return 1;
