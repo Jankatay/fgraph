@@ -8,7 +8,6 @@
 struct Graph {
   struct Vec names;   // each function name in order
   struct Vec* map;    // mapping of names to dependencies
-  int len;            // amt of vertices
 };
 
 
@@ -103,41 +102,82 @@ struct Graph fcalls(FILE* body, struct Vec usermade, int* status) {
 }
 
 
+// go through a file "codepath" and add graph to vector gbuf
+// needs a vector of usermade function names "names"
+// if *status is 1, will stay 1 and skip the function
+// if *status is 0, will put the error status
+// if status is not NULL, will ignore.
+// example usage :
+//         // init
+//         struct Graph gbuf = {};
+//         int &gerror = 0;
+//
+//         // process files a, b, c, d
+//         gadd("a", &gbuf, &gerror);  
+//         gadd("b", &gbuf, &gerror);
+//         gadd("c", &gbuf, &gerror);
+//         gadd("d", &gbuf, &gerror);
+//
+//         // return 0 on success and 1 on error
+//         return gerror
+// -------------------------------------------------------------------------------------------
+void gadd(char* codepath, struct Graph* gbuf, struct Vec names, int* status) {
+  // make a recycling bin for the status
+  int sdump;
+  if(!status) status = &sdump;
+
+  // sanitize
+  if(!codepath || !gbuf || !names.cap) {
+    *status = 1;
+    return;
+  }
+
+  // open the file
+  FILE* fp = fopen(codepath, "r");
+  if(!fp) {
+    *status = 1;
+    return;
+  }
+
+  // get the calls
+  struct Graph temp = fcalls(fp, names, status);
+  // TODO: manage appending fast
+  //gbuf.map = recalloc
+  
+  // append to gbuf
+  int oset = gbuf.cap;
+  for(int i = 0; i < temp.names.cap; i++) {
+    gbuf.names.arr[oset+i] = temp.names.arr[i];
+  //
+    vset(gbuf.names, gbuf.names.cap, )
+    gbuf.names[gbuf.names.cap] = temp.names;
+  }
+
+}
+
+
+
 // executable form
 // -------------------------------------------------------------------------------------------
 int main(int argc, char* argv[]) {
-/*
-  // add each file to a list
+  // get files, return if no files found
+  for(int i = 1; i < argc; i++) nftw(argv[i], files, 20, FTW_DEPTH | FTW_PHYS);
+  if(argc == 1) nftw(".", files, 20, FTW_DEPTH | FTW_PHYS);
+  if(!finfo.arr) return 0;
+
+  // for each file information
   struct Vec vbuf = {};
-  for(int i = 1; i < argc; i++) {
-    if(!fadd(&vbuf, argv[i])) {
-      fprintf(stderr, "File %s not found\n", argv[i]);
-      return EXIT_FAILURE;
-    }
+  for(int i = 0; i < finfo.cap; i++) {
+    // get name
+    char* name = finfo.arr[i];
+    if(!name) continue;
+    // add to list
+    ladd(&vbuf, name);
   }
 
-  // print vbuf
   for(int i = 0; i < vbuf.cap; i++) {
     if(vbuf.arr[i]) printf("%s\n", vbuf.arr[i]);
   }
-
-  // get map of dependencies
-  FILE* target = fopen(argv[1], "r");
-  struct Graph res = fcalls(target, vbuf, NULL);
-
-  for(int i = 0; i < res.names.cap; i++) {
-    for(int j = 0; j < res.map[i].cap; j++) {
-      printf("%s -> %s\n", res.names.arr[i], res.map[i].arr[j]);
-    }
-  }
-
-  vempty(vbuf);
-  vfree(vbuf);
-*/
-  // get files, return if no files found
-  nftw(".", files, 20, FTW_DEPTH | FTW_PHYS);
-  
-
-  // for each file
+    
   return 0;
 }

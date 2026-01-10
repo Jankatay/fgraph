@@ -68,7 +68,7 @@ struct Vec flist(FILE* fileptr) {
 // read functions from a file by name and append to optionally empty vector
 // returns 0 if could not open file
 // -------------------------------------------------------------------------------------------
-int fadd(struct Vec* list, char filename[BUFSIZE]) {
+int ladd(struct Vec* list, char filename[BUFSIZE]) {
   // open the file
   if(!filename || !list) return 0;
   FILE* fd = fopen(filename, "r");

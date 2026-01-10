@@ -92,13 +92,14 @@ int vset(struct Vec* vec, size_t index, const char* elem, size_t elen) {
 }
 
 
-// linear-search a vector
+// linear-search a vector for string "needle"
 // set returnAddress=NULL to just confirm
 // returns index when found, -1 when not found, and -2 on error
 // -------------------------------------------------------------------------------------------
-int vfind(struct Vec hay, char needle[BUFSIZE]) {
+int vfind(struct Vec hay, const char* needle) {
   // sanitize
   if(!hay.arr || !hay.len) return -2;
+  if(!needle) return -1;
   if(!hay.cap) return -1; 
 
   for(int i = 0; i < hay.cap; i++) {
