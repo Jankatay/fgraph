@@ -69,8 +69,7 @@ struct Graph fcalls(FILE* body, struct Vec usermade, int* status) {
   int gindex = 0;
   res = (struct Graph){
     .names = {},
-    .map = calloc(usermade.cap, sizeof(struct Vec)),
-    .len = usermade.cap
+    .map = calloc(usermade.cap, sizeof(struct Vec))
   };
 
   // to store function identifiers
@@ -102,62 +101,49 @@ struct Graph fcalls(FILE* body, struct Vec usermade, int* status) {
 }
 
 
-// go through a file "codepath" and add graph to vector gbuf
+// go through a file "codepath" and print graphviz format dependencies
 // needs a vector of usermade function names "names"
-// if *status is 1, will stay 1 and skip the function
-// if *status is 0, will put the error status
-// if status is not NULL, will ignore.
-// example usage :
-//         // init
-//         struct Graph gbuf = {};
-//         int &gerror = 0;
-//
-//         // process files a, b, c, d
-//         gadd("a", &gbuf, &gerror);  
-//         gadd("b", &gbuf, &gerror);
-//         gadd("c", &gbuf, &gerror);
-//         gadd("d", &gbuf, &gerror);
-//
-//         // return 0 on success and 1 on error
-//         return gerror
 // -------------------------------------------------------------------------------------------
-void gadd(char* codepath, struct Graph* gbuf, struct Vec names, int* status) {
-  // make a recycling bin for the status
-  int sdump;
-  if(!status) status = &sdump;
-
+void gprint(char* codepath, struct Vec names) {
   // sanitize
-  if(!codepath || !gbuf || !names.cap) {
-    *status = 1;
-    return;
-  }
+  if(!codepath || !names.cap) return;
 
   // open the file
   FILE* fp = fopen(codepath, "r");
-  if(!fp) {
-    *status = 1;
-    return;
+  if(!fp) return;
+
+  // get the function calls calls and print them
+  struct Graph temp = fcalls(fp, names, NULL);
+  if(!temp.map || !temp.names.cap) {
+    fclose(fp);
+    return; 
   }
 
-  // get the calls
-  struct Graph temp = fcalls(fp, names, status);
-  // TODO: manage appending fast
-  //gbuf.map = recalloc
-  
-  // append to gbuf
-  int oset = gbuf.cap;
+  // for each function
   for(int i = 0; i < temp.names.cap; i++) {
-    gbuf.names.arr[oset+i] = temp.names.arr[i];
-  //
-    vset(gbuf.names, gbuf.names.cap, )
-    gbuf.names[gbuf.names.cap] = temp.names;
+    // get the function name
+    char* name = temp.names.arr[i];
+    if(!name) continue;
+
+    // get the dependencies
+    struct Vec map = temp.map[i];
+    if(!map.cap) continue;
+
+    // for each dependency
+    for(int j = 0; j < map.cap; j++) {
+      // print the digraph format "dependency -> function name" for graphviz
+      char* depends = map.arr[j];
+      if(!depends) continue;
+      printf("\t%s -> %s\n", depends, name);
+    }
   }
 
+  // free and exit
+  fclose(fp);
 }
 
 
-
-// executable form
+// read files from arguments print all functions along with their dependencies into stdout
 // -------------------------------------------------------------------------------------------
 int main(int argc, char* argv[]) {
   // get files, return if no files found
@@ -171,13 +157,25 @@ int main(int argc, char* argv[]) {
     // get name
     char* name = finfo.arr[i];
     if(!name) continue;
-    // add to list
+    // setup a list of usermade functions
     ladd(&vbuf, name);
   }
 
-  for(int i = 0; i < vbuf.cap; i++) {
-    if(vbuf.arr[i]) printf("%s\n", vbuf.arr[i]);
+  printf("fgraph {\n");
+
+  // then go through those files with the list in your hand
+  for(int i = 0; i < finfo.cap; i++) {
+    // get name
+    char* name = finfo.arr[i];
+    if(!name) continue;
+    // print graphviz format using that list
+    //gprint(name, vbuf);
   }
-    
+
+  // free and exit
+  vempty(vbuf);
+  vfree(vbuf);
+  vempty(finfo);
+  vfree(finfo);
   return 0;
 }
