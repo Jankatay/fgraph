@@ -8,9 +8,9 @@
 
 // important global variables 
 // -------------------------------------------------------------------------------------------
-struct Vec finfo = {};           // Will be appended result of "files" function
-char* fext = NULL;               // Optional extensions for the "files" function
-struct Vec fexc = {};            // Exclude these files
+struct Vec finfo = {};                      // Will be appended result of "files" function
+char* fext = ".c, .cpp, .h, .hpp";          // Optional extensions for the "files" function
+struct Vec fexc = {};                       // Exclude these files
 
 
 // function for the ntfw(3), appends source code files under a directory
@@ -25,6 +25,10 @@ static int files(const char* topdir, const struct stat* sb, int tflag, struct FT
   // skip hidden files like ".git" by default.
   // char* filename = strrchr(topdir, '/');
   // if(filename && *filename[1] == '.') return 0;
+
+  // ensure correct extension
+  char* extension = strrchr(topdir, '.');
+  if(extension && !strstr(fext, extension)) return 0;
 
   // skip excluded files.
   if(vfind(fexc, topdir) >= 0) return 0;

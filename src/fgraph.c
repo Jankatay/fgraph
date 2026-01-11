@@ -161,7 +161,8 @@ int main(int argc, char* argv[]) {
     ladd(&vbuf, name);
   }
 
-  printf("fgraph {\n");
+  // graphviz header
+  printf("digraph {\n");
 
   // then go through those files with the list in your hand
   for(int i = 0; i < finfo.cap; i++) {
@@ -169,8 +170,11 @@ int main(int argc, char* argv[]) {
     char* name = finfo.arr[i];
     if(!name) continue;
     // print graphviz format using that list
-    //gprint(name, vbuf);
+    gprint(name, vbuf);
   }
+
+  // graphviz footer
+  printf("}\n");
 
   // free and exit
   vempty(vbuf);
