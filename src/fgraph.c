@@ -1,6 +1,8 @@
 #include "flist.c"
 #include "file.c"
 #include <ftw.h>
+#include <limits.h>
+#include <unistd.h>
 
 
 // Graph to map a function to its dependencies.
@@ -101,12 +103,12 @@ struct Graph fcalls(FILE* body, struct Vec usermade, int* status) {
 }
 
 
-// go through a file "codepath" and print graphviz format dependencies
+// go through a file "codepath" and print graphviz format dependencies to "dest"
 // needs a vector of usermade function names "names"
 // -------------------------------------------------------------------------------------------
-void gprint(char* codepath, struct Vec names) {
+void gprint(FILE* dest, char* codepath, struct Vec names) {
   // sanitize
-  if(!codepath || !names.cap) return;
+  if(!codepath || !names.cap || !dest) return;
 
   // open the file
   FILE* fp = fopen(codepath, "r");
@@ -134,7 +136,7 @@ void gprint(char* codepath, struct Vec names) {
       // print the digraph format "dependency -> function name" for graphviz
       char* depends = map.arr[j];
       if(!depends) continue;
-      printf("\t%s -> %s\n", depends, name);
+      fprintf(dest, "\t%s -> %s\n", depends, name);
     }
   }
 
@@ -146,12 +148,37 @@ void gprint(char* codepath, struct Vec names) {
 // read files from arguments print all functions along with their dependencies into stdout
 // -------------------------------------------------------------------------------------------
 int main(int argc, char* argv[]) {
-  // get files, return if no files found
-  for(int i = 1; i < argc; i++) nftw(argv[i], files, 20, FTW_DEPTH | FTW_PHYS);
-  if(argc == 1) nftw(".", files, 20, FTW_DEPTH | FTW_PHYS);
+  // init commandline options
+  FILE* output = stdout;
+  
+  // get path and optional output
+  char opt = 0;
+  int specificDirs = 0;
+  while((opt = getopt(argc, argv, "-ho:")) != -1) {
+    // printing usage
+    if(opt == 'h') {
+      fprintf(stderr, "Usage: %s [-o output.dot] [filenames]");
+      return opt == 'h';
+    }
+    
+    // setting output
+    if(opt == 'o') {
+      char* filename = optarg;
+      if((output = fopen(filename, "w+"))) continue;
+      fprintf(stderr, "Could not open %s\n", filename);
+      return 1;
+    }
+
+    // by default it's an input path 
+    nftw(optarg, files, 20, FTW_DEPTH | FTW_PHYS);
+    specificDirs = 1;
+  }
+
+  // if paths were not specified, run on current dir
+  if(!specificDirs) nftw(".", files, 20, FTW_DEPTH | FTW_PHYS);
   if(!finfo.arr) return 0;
 
-  // for each file information
+  // for each path information
   struct Vec vbuf = {};
   for(int i = 0; i < finfo.cap; i++) {
     // get name
@@ -162,7 +189,7 @@ int main(int argc, char* argv[]) {
   }
 
   // graphviz header
-  printf("digraph {\n");
+  fprintf(output, "digraph {\n");
 
   // then go through those files with the list in your hand
   for(int i = 0; i < finfo.cap; i++) {
@@ -170,16 +197,17 @@ int main(int argc, char* argv[]) {
     char* name = finfo.arr[i];
     if(!name) continue;
     // print graphviz format using that list
-    gprint(name, vbuf);
+    gprint(output, name, vbuf);
   }
 
   // graphviz footer
-  printf("}\n");
+  fprintf(output, "}\n");
 
   // free and exit
   vempty(vbuf);
   vfree(vbuf);
   vempty(finfo);
   vfree(finfo);
+  fclose(output);
   return 0;
 }
