@@ -10,7 +10,7 @@ compress: fgraph
 	rm -f "$<~"
 
 fgraph: fgraph.c base.c vec.c flist.c fgraph.c file.c
-	$(CC) -o $@ $< -D_GNU_SOURCE
+	$(CC) -o $@ $< -D_GNU_SOURCE -g
 
 .PHONY: clean
 clean:

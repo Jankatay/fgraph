@@ -3,6 +3,7 @@
 #include <fcntl.h>
 #include <ftw.h>
 #include <string.h>
+#include <limits.h>
 #include "vec.c"
 
 
@@ -18,9 +19,13 @@ struct Vec fexc = {};                       // Exclude these files
 // can setup an optionally space-seperated list of extensions 
 // for example fext = ".c .cpp .h" will only append files that have those extensions
 // -------------------------------------------------------------------------------------------
-static int files(const char* topdir, const struct stat* sb, int tflag, struct FTW* ftwbuf) {
+static int files(const char topdir[PATH_MAX], const struct stat* sb, int tflag, struct FTW* ftwbuf) {
   // skip [REDACTED]
-  if(!topdir) return 0; 
+  if(!topdir) return 0;
+
+  // skip non-files 
+  if(!sb) return 0;
+  if(sb->st_mode & S_IFMT ^ S_IFREG) return 0;
 
   // skip hidden files like ".git" by default.
   // char* filename = strrchr(topdir, '/');

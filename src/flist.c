@@ -71,6 +71,7 @@ struct Vec flist(FILE* fileptr) {
 int ladd(struct Vec* list, char filename[BUFSIZE]) {
   // open the file
   if(!filename || !list) return 0;
+  //TODO: fix this also
   FILE* fd = fopen(filename, "r");
   if(!fd) return 0;
 

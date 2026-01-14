@@ -1,7 +1,6 @@
 #include "flist.c"
 #include "file.c"
 #include <ftw.h>
-#include <limits.h>
 #include <unistd.h>
 
 
