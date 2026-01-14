@@ -2,8 +2,8 @@
 Made for my personal use. Fgraph simply reads someone elses C code and makes a graph of what functions depend on what using graphviz format.  
 
 # Usage 
-Minimalist commandline program. Very similar to how you would use or pipe stuff like `cat` or `grep.`
-`fgraph | dot -Tpng -o out.png`
+Minimalist commandline program. Very similar to how you would use or pipe stuff like `cat` or `grep.`  
+```fgraph | dot -Tpng -o out.png```
 
 # Why?
 I decided I will try and make a project with as least tooling like old programmers to grow some muscle memory. It also helps learning how to read documentation from manpages and header files.
