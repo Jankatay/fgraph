@@ -116,6 +116,7 @@ void gprint(FILE* dest, char* codepath, struct Vec names) {
   // get the function calls calls and print them
   struct Graph temp = fcalls(fp, names, NULL);
   if(!temp.map || !temp.names.cap) {
+    if(temp.map) free(temp.map);
     fclose(fp);
     return; 
   }
@@ -136,10 +137,19 @@ void gprint(FILE* dest, char* codepath, struct Vec names) {
       char* depends = map.arr[j];
       if(!depends) continue;
       fprintf(dest, "\t%s -> %s\n", depends, name);
+      // empty the mapping
+      free(depends);
     }
+
+    // empty the graph
+    free(map.arr);
+    free(map.len);
   }
 
   // free and exit
+  vempty(temp.names);
+  vfree(temp.names);
+  free(temp.map);
   fclose(fp);
 }
 
