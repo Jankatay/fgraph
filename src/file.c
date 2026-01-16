@@ -40,7 +40,7 @@ static int files(const char topdir[PATH_MAX], const struct stat* sb, int tflag, 
 
   // append
   if(tflag == FTW_F) {
-    vset(&finfo, finfo.cap, topdir, strnlen(topdir, BUFSIZE));
+    vset(&finfo, finfo.cap, topdir, strnlen(topdir, BUFSIZE)+1);
   }
 
   // continue
