@@ -25,7 +25,7 @@ static int files(const char topdir[PATH_MAX], const struct stat* sb, int tflag, 
 
   // skip non-files 
   if(!sb) return 0;
-  if(sb->st_mode & S_IFMT ^ S_IFREG) return 0;
+  if((sb->st_mode & S_IFMT) ^ S_IFREG) return 0;
 
   // skip hidden files like ".git" by default.
   // char* filename = strrchr(topdir, '/');

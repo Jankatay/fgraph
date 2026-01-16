@@ -46,7 +46,7 @@ struct Vec {
 // -------------------------------------------------------------------------------------------
 void vempty(struct Vec v) {
   if(!v.arr) return; // already empty
-  for(int i = 0; i < v.cap; i++) {
+  for(size_t i = 0; i < v.cap; i++) {
     if(v.arr[i]) free(v.arr[i]);
   }
 }
@@ -102,7 +102,7 @@ int vfind(struct Vec hay, const char* needle) {
   if(!needle) return -1;
   if(!hay.cap) return -1; 
 
-  for(int i = 0; i < hay.cap; i++) {
+  for(size_t i = 0; i < hay.cap; i++) {
     // init
     char* str = hay.arr[i];
     int len = hay.len[i];

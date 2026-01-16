@@ -122,7 +122,7 @@ void gprint(FILE* dest, char* codepath, struct Vec names) {
   }
 
   // for each function
-  for(int i = 0; i < temp.names.cap; i++) {
+  for(size_t i = 0; i < temp.names.cap; i++) {
     // get the function name
     char* name = temp.names.arr[i];
     if(!name) continue;
@@ -132,14 +132,22 @@ void gprint(FILE* dest, char* codepath, struct Vec names) {
     if(!map.cap) continue;
 
     // for each dependency
-    for(int j = 0; j < map.cap; j++) {
+    struct Vec repeats = {};
+    for(size_t j = 0; j < map.cap; j++) {
       // print the digraph format "dependency -> function name" for graphviz
       char* depends = map.arr[j];
+      int dlen = map.len[j];
       if(!depends) continue;
-      fprintf(dest, "\t%s -> %s\n", depends, name);
+
+      // if not repeating, anything, print the dependancy.
+      if(vfind(repeats, depends) < 0) fprintf(dest, "\t%s -> %s\n", depends, name);
+
       // empty the mapping
+      vset(&repeats, repeats.cap, depends, dlen);
       free(depends);
     }
+    vempty(repeats);
+    vfree(repeats);
 
     // empty the graph
     free(map.arr);
@@ -166,7 +174,7 @@ int main(int argc, char* argv[]) {
   while((opt = getopt(argc, argv, "-ho:")) != -1) {
     // printing usage
     if(opt == 'h') {
-      fprintf(stderr, "Usage: %s [-o output.dot] [filenames]");
+      fprintf(stderr, "Usage: %s [-o output.dot] [filenames]", argv[0]);
       return opt == 'h';
     }
     
@@ -189,7 +197,7 @@ int main(int argc, char* argv[]) {
 
   // for each path information
   struct Vec vbuf = {};
-  for(int i = 0; i < finfo.cap; i++) {
+  for(size_t i = 0; i < finfo.cap; i++) {
     // get name
     char* name = finfo.arr[i];
     if(!name) continue;
@@ -201,7 +209,7 @@ int main(int argc, char* argv[]) {
   fprintf(output, "digraph {\n");
 
   // then go through those files with the list in your hand
-  for(int i = 0; i < finfo.cap; i++) {
+  for(size_t i = 0; i < finfo.cap; i++) {
     // get name
     char* name = finfo.arr[i];
     if(!name) continue;

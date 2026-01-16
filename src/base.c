@@ -47,13 +47,13 @@ int identifier(char** str, char identres[BUFSIZE], int* identlen) {
   char* c = NULL; 
 
   // until the delimiter
-  for(c = *str; c && *c != EOF; *c++) {
+  for(c = *str; c && *c != EOF; c++) {
     if(*identlen == (BUFSIZ-1)) return 0;
     // check delimiter
     if(isspace(*c)) break;
     if(ispunct(*c)) break;
     // check error
-    if(!isalnum) return 0;
+    if(!isalnum(*c)) return 0;
     // add to list otherwise.
     identres[ (*identlen)++ ] = *c;
   }
@@ -119,11 +119,9 @@ enum Token ftoken(FILE* srcfp, char namebuf[BUFSIZE], int* namelen) {
   // init
   char linebuf[BUFSIZE] = "";
   char* lineptr = fgets(linebuf, BUFSIZE, srcfp);
-  if(!linebuf) return TOK_EOF; 
+  if(!lineptr) return TOK_EOF; 
 
   // loop
-  char ebuf[BUFSIZE] = "";
-  int elen = 0;
   while("there are tokens") {
     enum Token nextToken = token(&lineptr, namebuf, namelen);
     if(!lineptr) return TOK_EOF; // 
