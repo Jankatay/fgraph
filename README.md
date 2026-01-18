@@ -7,6 +7,7 @@ Minimalist commandline program. Very similar to how you would use or pipe stuff 
 
 # Output
 <img src="out.png" alt="">
+
 # Why?
 I decided I will try and make a project with as least tooling like old programmers to grow some muscle memory. It also helps learning how to read documentation from manpages and header files.
 Rules for this "game" were as follows.
