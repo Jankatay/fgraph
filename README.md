@@ -12,7 +12,7 @@ Minimalist commandline program. Very similar to how you would use or pipe stuff 
 I decided I will try and make a project with very VERY little amount of tooling like old programmers to grow some muscle memory. It also helps learning how to read documentation from manpages and header files.
 Rules for this "game" were as follows.
 - No internet besides pushing to github. This means no googling or stackoverflow etc.
-- No IDE. I am only allowed vim without plugins. Vim's builtin syntax highlighting and autocomplete disabled as well. (Does exist in fact)
+- No IDE. I am only allowed vim without plugins. Vim's builtin syntax highlighting and autocomplete disabled as well. (Does exist, in fact)
 - No desktop environment, the entire thing has to be done from tty mode.
 
 ### Result
