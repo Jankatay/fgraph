@@ -12,7 +12,7 @@
 // Reallocate pointer 'p' of 'oldsize' to 'newsize', "size" bytes each.
 // If you want something faster, use realloc and memset with pointer arithmetic.
 // Be warned that technique is warned by valgrind.
-// Initializes new memory to 0.
+// Initializes new memory to 0, just like calloc.
 // -------------------------------------------------------------------------------------------
 void* recalloc(void* ptr, size_t oldsize, size_t newsize, size_t size) {
   // realloc with 0 is not c99
