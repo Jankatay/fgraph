@@ -9,7 +9,7 @@ compress: fgraph
 	$(PACKER) $< 
 	rm -f "$<~"
 
-fgraph: fgraph.c base.c vec.c flist.c fgraph.c file.c
+fgraph: fgraph.c base.c vec.c flist.c file.c
 	$(CC) -o $@ $< $(CFLAGS)
 
 .PHONY: clean
